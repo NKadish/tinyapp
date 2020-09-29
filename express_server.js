@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
+const cookies = require("cookie-parser");
+app.use(cookies());
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.set("view engine", "ejs");
@@ -30,12 +32,18 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => { // send the code over to our templates
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    username: req.cookies["username"],
+    urls: urlDatabase 
+  };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => { // for when we want to open the new url page 
-  res.render("urls_new");
+  const templateVars = { 
+    username: req.cookies["username"]
+  };
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => { // when someone enters a url to be shortened, we generate a random string for it, then put it into the database and then redirect to the page associated
@@ -54,7 +62,11 @@ app.get("/u/:shortURL", (req, res) => { // the actual functionality for using th
 });
 
 app.get("/urls/:shortURL", (req, res) => { // when they go to this link, it shows them the original url and the small version of it
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { 
+    username: req.cookies["username"], 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL] 
+  };
   res.render("urls_show", templateVars);
 });
 // lets the user edit the URL from the shortURL page, changing the URL asociated with the shortened version
@@ -65,5 +77,10 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res) => { // Deletes the selected item from the object
   delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+});
+
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
