@@ -57,8 +57,13 @@ app.get("/urls/:shortURL", (req, res) => { // when they go to this link, it show
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
+// lets the user edit the URL from the shortURL page, changing the URL asociated with the shortened version
+app.post("/urls/:shortURL", (req, res) => { 
+  urlDatabase[req.params.shortURL] = req.body.longURLEdit;
+  res.redirect('/urls');
+});
 
-app.post('/urls/:shortURL/delete', (req, res) => {
+app.post('/urls/:shortURL/delete', (req, res) => { // Deletes the selected item from the object
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
