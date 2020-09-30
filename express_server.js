@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookies = require("cookie-parser");
-const dupeEmailChecker = require('./helperFuncs');
+const dupeChecker = require('./helperFuncs');
 app.use(cookies());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -98,12 +98,6 @@ app.post('/urls/:shortURL/delete', (req, res) => { // Deletes the selected item 
   res.redirect('/urls');
 });
 
-// lets people login and saves their cookies
-app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
-});
-
 // lets people logout and deletes the cookie
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
@@ -122,12 +116,12 @@ app.get("/register", (req, res) => {
 // posts the new user into the users object and redirects
 app.post('/register', (req, res) => {
   const userID = generateRandomString();
-  if (dupeEmailChecker(users, req.body.email)) { // checks to see if the email alredy exists
+  if (dupeChecker(users, 'email', req.body.email)) { // checks to see if the email alredy exists
     res.status(400);
     res.send('Error code 400: this email already exists in the database, please try again');
   } else if (req.body.email === '' || req.body.password === '') { // checks to see if the email fields are empty or not 
     res.status(400);
-    res.send('Error code 400: username or passwords fields are empty, please try again');
+    res.send('Error code 400: email or passwords fields are empty, please try again');
   } else { // if there are no errors, it posts the new user 
     users[userID] = {
       id: userID,
@@ -139,10 +133,27 @@ app.post('/register', (req, res) => {
   }
 });
 
-app.get("/login", (req, res) => {
+// gets the login page
+app.get('/login', (req, res) => {
   const templateVars = { 
     usersObj: users,
     id: req.cookies["user_id"] 
   };
   res.render("user_login", templateVars);
+});
+
+// login functionality, if the email doesn't match one that we have stored if gives an error
+// if the password isn't right it gives an error 
+// if the email and password are correct it sets the cookie to the one associated with the email and pass 
+app.post('/login', (req, res) => {
+  if (dupeChecker(users, 'email', req.body.email) === false) {
+    res.status(403);
+    res.send('Error code 403: The email entered does not match any in our database, please try again');
+  } else if (dupeChecker(users, 'password', req.body.password) === false) {
+    res.status(403);
+    res.send('Error code 403: Incorrect password, please try again');
+  } else if (dupeChecker(users, 'email', req.body.email) && dupeChecker(users, 'password', req.body.password)) {
+    res.cookie('user_id', users[dupeChecker(users, 'email', req.body.email, true)].id);
+    res.redirect('/urls');
+  }
 });

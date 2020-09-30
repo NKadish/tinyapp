@@ -10,18 +10,19 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a> 
       </div>
       <div class="navbar-collapse nav justify-content-end">
-        <% if (id) { %>
-        <form action="/logout" method="post">
-          <button type="submit" class="btn btn-success">Logout</button>
-        </form>
+        <% if (usersObj[id] !== undefined) { %>
+          <b>Logged in as: <%= usersObj[id].email %></b>
+          <form action="/logout" method="post">
+            <button type="submit" class="btn btn-success">Logout</button>
+          </form>
         <% } else { %>
           <form action="/login" method="GET">
             <button type="submit" class="btn btn-success">Login</button>
           </form>
+          <form action="/register" method="GET">
+            <button type="submit" class="btn btn-success">Register</button>
+          </form>
         <% } %>
-      <form action="/register" method="GET">
-        <button type="submit" class="btn btn-success">Register</button>
-      </form>
       </div>
     </div>
   </nav>

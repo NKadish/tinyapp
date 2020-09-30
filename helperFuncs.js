@@ -1,10 +1,14 @@
-const dupeEmailChecker = function (object, email) {
+const dupeChecker = function (object, formString, thingToCheck, findKeyBoolean) {
   for (let keys in object) {
-    if (object[keys].email === email) {
+    if (object[keys][formString] === thingToCheck) {
+      if (findKeyBoolean) {
+        return keys;
+      }
       return true;
     }
   }
   return false; 
-}
+};
 
-module.exports = dupeEmailChecker;
+
+module.exports = dupeChecker;
