@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookies = require("cookie-parser");
+const dupeEmailChecker = require('./helperFuncs');
 app.use(cookies());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -26,7 +27,7 @@ const users = {
     email: "user2@example.com", 
     password: "dishwasher-funk"
   }
-}
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -121,11 +122,19 @@ app.get("/register", (req, res) => {
 // posts the new user into the users object and redirects
 app.post('/register', (req, res) => {
   const userID = generateRandomString();
-  users[userID] = {
-    id: userID,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookie('user_id', users[userID]['id']);
-  res.redirect('/urls');
+  if (dupeEmailChecker(users, req.body.email)) { // checks to see if the email alredy exists
+    res.status(400);
+    res.send('Error code 400: this email already exists in the database, please try again');
+  } else if (req.body.email === '' || req.body.password === '') { // checks to see if the email fields are empty or not 
+    res.status(400);
+    res.send('Error code 400: username or passwords fields are empty, please try again');
+  } else { // if there are no errors, it posts the new user 
+    users[userID] = {
+      id: userID,
+      email: req.body.email,
+      password: req.body.password
+    };
+    res.cookie('user_id', users[userID]['id']);
+    res.redirect('/urls');
+  }
 });
