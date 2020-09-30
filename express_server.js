@@ -46,7 +46,8 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => { // send the code over to our templates
   const templateVars = { 
-    username: req.cookies["username"],
+    id: req.cookies["user_id"],
+    usersObj: users,
     urls: urlDatabase 
   };
   res.render("urls_index", templateVars);
@@ -54,7 +55,8 @@ app.get("/urls", (req, res) => { // send the code over to our templates
 
 app.get("/urls/new", (req, res) => { // for when we want to open the new url page 
   const templateVars = { 
-    username: req.cookies["username"]
+    usersObj: users,
+    id: req.cookies["user_id"]
   };
   res.render("urls_new", templateVars);
 });
@@ -76,12 +78,14 @@ app.get("/u/:shortURL", (req, res) => { // the actual functionality for using th
 
 app.get("/urls/:shortURL", (req, res) => { // when they go to this link, it shows them the original url and the small version of it
   const templateVars = { 
-    username: req.cookies["username"], 
+    usersObj: users,
+    id: req.cookies["user_id"],
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL] 
   };
   res.render("urls_show", templateVars);
 });
+
 // lets the user edit the URL from the shortURL page, changing the URL asociated with the shortened version
 app.post("/urls/:shortURL", (req, res) => { 
   urlDatabase[req.params.shortURL] = req.body.longURLEdit;
@@ -92,24 +96,29 @@ app.post('/urls/:shortURL/delete', (req, res) => { // Deletes the selected item 
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
+
 // lets people login and saves their cookies
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
+
 // lets people logout and deletes the cookie
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 });
+
 // the registration page
 app.get("/register", (req, res) => {
   const templateVars = { 
-    username: req.cookies["username"], 
+    usersObj: users,
+    id: req.cookies["user_id"] 
   };
   res.render("user_reg", templateVars);
 });
 
+// posts the new user into the users object and redirects
 app.post('/register', (req, res) => {
   const userID = generateRandomString();
   users[userID] = {
@@ -117,7 +126,6 @@ app.post('/register', (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  console.log(users);
   res.cookie('user_id', users[userID]['id']);
   res.redirect('/urls');
 });
