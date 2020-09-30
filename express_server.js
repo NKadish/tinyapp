@@ -106,7 +106,7 @@ app.post('/login', (req, res) => {
 
 // lets people logout and deletes the cookie
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
@@ -137,4 +137,12 @@ app.post('/register', (req, res) => {
     res.cookie('user_id', users[userID]['id']);
     res.redirect('/urls');
   }
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = { 
+    usersObj: users,
+    id: req.cookies["user_id"] 
+  };
+  res.render("user_login", templateVars);
 });
