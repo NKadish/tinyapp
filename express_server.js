@@ -64,8 +64,12 @@ app.get("/urls/new", (req, res) => { // for when we want to open the new url pag
 
 app.post("/urls", (req, res) => { // when someone enters a url to be shortened, we generate a random string for it, then put it into the database and then redirect to the page associated
   const newID = generateRandomString();
-  urlDatabase[newID] = req.body.longURL;
-  res.redirect(`/urls/${newID}`);
+  if (users[req.cookies["user_id"]] === undefined ) {
+    res.redirect('/login');
+  } else {
+    urlDatabase[newID] = req.body.longURL;
+    res.redirect(`/urls/${newID}`);
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => { // the actual functionality for using the short urls
