@@ -12,8 +12,8 @@ app.set("view engine", "ejs");
 const generateRandomString = () => Math.random().toString(36).substring(2,8);
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca" },
+  "9sm5xK": { longURL: "http://www.google.com" }
 };
 
 const users = { 
@@ -67,17 +67,16 @@ app.post("/urls", (req, res) => { // when someone enters a url to be shortened, 
   if (users[req.cookies["user_id"]] === undefined ) {
     res.redirect('/login');
   } else {
-    urlDatabase[newID] = req.body.longURL;
+    urlDatabase[newID] = {longURL: req.body.longURL, userID: users[req.cookies["user_id"]].id};
     res.redirect(`/urls/${newID}`);
   }
 });
 
 app.get("/u/:shortURL", (req, res) => { // the actual functionality for using the short urls
-  const longURL = urlDatabase[req.params.shortURL];
-  if (longURL === undefined) { // if the url entered does not match one in the object, it 404s
+  if (urlDatabase[req.params.shortURL].longURL === undefined) { // if the url entered does not match one in the object, it 404s
     res.send('404, the URL you entered was incorrect, please try again');
   } else { // if it does match it redirects to the page for that url
-    res.redirect(longURL);
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
   }
 });
 
@@ -86,14 +85,14 @@ app.get("/urls/:shortURL", (req, res) => { // when they go to this link, it show
     usersObj: users,
     id: req.cookies["user_id"],
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL] 
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
   res.render("urls_show", templateVars);
 });
 
 // lets the user edit the URL from the shortURL page, changing the URL asociated with the shortened version
 app.post("/urls/:shortURL", (req, res) => { 
-  urlDatabase[req.params.shortURL] = req.body.longURLEdit;
+  urlDatabase[req.params.shortURL].longURL = req.body.longURLEdit;
   res.redirect('/urls');
 });
 
