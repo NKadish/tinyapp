@@ -22,7 +22,11 @@ const urlDatabase = {};
 const users = {};
 
 app.get('/', (req, res) => {
-  res.redirect('/urls');
+  if (users[req.session['user_id']] === undefined) {
+    res.redirect('/login');
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 app.listen(PORT, () => {
@@ -43,7 +47,11 @@ app.get('/urls/new', (req, res) => { // for when we want to open the new url pag
     usersObj: users,
     id: req.session['user_id']
   };
-  res.render('urls_new', templateVars);
+  if (users[req.session['user_id']] === undefined) {
+    res.redirect('/login');
+  } else {
+    res.render('urls_new', templateVars);
+  }
 });
 
 app.post('/urls', (req, res) => { // when someone enters a url to be shortened, we generate a random string for it, then put it into the database and then redirect to the page associated
@@ -71,7 +79,7 @@ app.get('/urls/:shortURL', (req, res) => {
     id: req.session['user_id'],
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL].longURL,
-    songUserID: urlDatabase[req.params.shortURL].userID
+    linkUserID: urlDatabase[req.params.shortURL].userID
   };
   res.render('urls_show', templateVars);
 });
@@ -108,7 +116,11 @@ app.get('/register', (req, res) => {
     usersObj: users,
     id: req.session['user_id'] 
   };
-  res.render('user_reg', templateVars);
+  if (users[req.session['user_id']]) {
+    res.redirect('/urls');
+  } else {
+    res.render('user_reg', templateVars);
+  } 
 });
 
 // posts the new user into the users object and redirects
@@ -138,7 +150,11 @@ app.get('/login', (req, res) => {
     usersObj: users,
     id: req.session['user_id'] 
   };
-  res.render('user_login', templateVars);
+  if (users[req.session['user_id']]) {
+    res.redirect('/urls');
+  } else {
+    res.render('user_login', templateVars);
+  }
 });
 
 // login functionality, if the email doesn't match one that we have stored if gives an error
