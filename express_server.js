@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const bodyParser = require('body-parser');
-var cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session')
 const dupeChecker = require('./helperFuncs');
 const bcrypt = require('bcrypt');
 app.use(cookieSession({
