@@ -5,48 +5,28 @@ const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session')
 const dupeChecker = require('./helperFuncs');
 const bcrypt = require('bcrypt');
+
 app.use(cookieSession({
   name: 'session',
   keys: ['key1']
 }));
+
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.set('view engine', 'ejs');
 
 const generateRandomString = () => Math.random().toString(36).substring(2,8);
 
-const urlDatabase = {
-  'b2xVn2': { longURL: 'http://www.lighthouselabs.ca' },
-  '9sm5xK': { longURL: 'http://www.google.com' }
-};
+const urlDatabase = {};
 
-const users = { 
-  'userRandomID': {
-    id: 'userRandomID', 
-    email: 'user@example.com', 
-    password: 'purple-monkey-dinosaur'
-  },
- 'user2RandomID': {
-    id: 'user2RandomID', 
-    email: 'user2@example.com', 
-    password: 'dishwasher-funk'
-  }
-};
+const users = {};
 
 app.get('/', (req, res) => {
-  res.send('Hello!');
+  res.redirect('/urls');
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
-app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>World</b></body></html>\n');
+  console.log(`tinyApp listening on port ${PORT}!`);
 });
 
 app.get('/urls', (req, res) => { // send the code over to our templates
@@ -84,7 +64,8 @@ app.get('/u/:shortURL', (req, res) => { // the actual functionality for using th
   }
 });
 
-app.get('/urls/:shortURL', (req, res) => { // when they go to this link, it shows them the original url and the small version of it
+// when they go to this link, it shows them the original url and the small version of it
+app.get('/urls/:shortURL', (req, res) => {
   const templateVars = { 
     usersObj: users,
     id: req.session['user_id'],
@@ -105,7 +86,8 @@ app.post('/urls/:shortURL', (req, res) => {
   }
 });
 
-app.post('/urls/:shortURL/delete', (req, res) => { // Deletes the selected item from the object
+// Deletes the selected item from the object
+app.post('/urls/:shortURL/delete', (req, res) => {
   if (urlDatabase[req.params.shortURL].userID === req.session['user_id']) {
     delete urlDatabase[req.params.shortURL];
   } else {
