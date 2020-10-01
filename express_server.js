@@ -85,19 +85,28 @@ app.get("/urls/:shortURL", (req, res) => { // when they go to this link, it show
     usersObj: users,
     id: req.cookies["user_id"],
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL
+    longURL: urlDatabase[req.params.shortURL].longURL,
+    songUserID: urlDatabase[req.params.shortURL].userID
   };
   res.render("urls_show", templateVars);
 });
 
 // lets the user edit the URL from the shortURL page, changing the URL asociated with the shortened version
 app.post("/urls/:shortURL", (req, res) => { 
-  urlDatabase[req.params.shortURL].longURL = req.body.longURLEdit;
-  res.redirect('/urls');
+  if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"]) {
+    urlDatabase[req.params.shortURL].longURL = req.body.longURLEdit;
+    res.redirect('/urls');
+  } else {
+    res.send("Error! That link doesn't belong to you! You can't edit it!");
+  }
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => { // Deletes the selected item from the object
-  delete urlDatabase[req.params.shortURL];
+  if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"]) {
+    delete urlDatabase[req.params.shortURL];
+  } else {
+    res.send("Error! That link doesn't belong to you! You can't delete it!");
+  }
   res.redirect('/urls');
 });
 

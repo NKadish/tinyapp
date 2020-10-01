@@ -7,6 +7,19 @@
 </head>
 <body>
   <%- include('partials/_header') %>
+  <% if (usersObj[id] === undefined) { %>
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Login in order to access the edit page of the links that you've created!  </h5>
+      </div>
+    </div>
+  <% } else if (usersObj[id].id !== songUserID) { %>
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title"> This link belongs to a different user! Please enter a link that belongs to you. </h5>
+      </div>
+    </div>
+    <% } else { %>
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
@@ -22,6 +35,7 @@
       </form>
     </div>
   </div>
+  <% } %>
 
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
