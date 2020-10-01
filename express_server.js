@@ -4,6 +4,7 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookies = require("cookie-parser");
 const dupeChecker = require('./helperFuncs');
+const bcrypt = require('bcrypt');
 app.use(cookies());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -135,10 +136,11 @@ app.post('/register', (req, res) => {
     res.status(400);
     res.send('Error code 400: email or passwords fields are empty, please try again');
   } else { // if there are no errors, it posts the new user 
+    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
     users[userID] = {
       id: userID,
       email: req.body.email,
-      password: req.body.password
+      password: hashedPassword
     };
     res.cookie('user_id', users[userID]['id']);
     res.redirect('/urls');
@@ -161,10 +163,10 @@ app.post('/login', (req, res) => {
   if (dupeChecker(users, 'email', req.body.email) === false) {
     res.status(403);
     res.send('Error code 403: The email entered does not match any in our database, please try again');
-  } else if (dupeChecker(users, 'password', req.body.password) === false) {
+  } else if (bcrypt.compareSync(req.body.password, users[users[dupeChecker(users, 'email', req.body.email, true)].id].password) === false) {
     res.status(403);
     res.send('Error code 403: Incorrect password, please try again');
-  } else if (dupeChecker(users, 'email', req.body.email) && dupeChecker(users, 'password', req.body.password)) {
+  } else if (dupeChecker(users, 'email', req.body.email) && bcrypt.compareSync(req.body.password, users[users[dupeChecker(users, 'email', req.body.email, true)].id].password)) {
     res.cookie('user_id', users[dupeChecker(users, 'email', req.body.email, true)].id);
     res.redirect('/urls');
   }
